@@ -94,6 +94,39 @@ _Command explained_
 
 `-C "ahmet@fedoraVMAzure"` = a comment appended to the end of the public key file to easily identify it.  Normally an email is used as the comment but you can use whatever works best for your infrastructure.
 
+Example steps:
+
+1. Make sure your implementation of **ssh-keygen** and **openssl** is up to date. This varies by platform. 
+
+	- For Mac, be sure to visit the [Apple Product Security web site](https://support.apple.com/HT201222) and choose the proper updates if necessary.
+	- For Debian-based Linux distributions such as Ubuntu, Debian, Mint, and so on:
+
+			sudo apt-get install --upgrade-only openssl
+
+	- For RPM-based Linux distributions such as CentOS and Oracle Linux:
+
+			sudo yum update openssl
+
+	- For SLES and OpenSUSE
+
+			sudo zypper update openssl
+
+2. Use **ssh-keygen** to create a 2048-bit RSA public and private key files, and unless you have a specific location or specific names for the files, accept the default location and name of `~/.ssh/id_rsa`. The basic command is:
+
+		ssh-keygen -t rsa -b 2048 
+
+	Typically, your **ssh-keygen** implementation adds a comment, often the username and host name of the computer. You can specify a specific comment using the `-C` option.
+
+3. Create a .pem file from your `~/.ssh/id_rsa` file to enable you to work with the Classic Management Portal. Use the **openssl** as follows:
+
+		openssl req -x509 -key ~/.ssh/id_rsa -nodes -days 365 -newkey rsa:2048 -out myCert.pem
+
+	If you want to create a .pem file from a different private key file, modify the `-key` argument. 
+
+> [AZURE.NOTE] If you plan to manage services deployed with the classic deployment model, you may also want to create a **.cer** format file to upload to the portal -- although this doesn't involve **ssh** or connecting to Linux VMS, which is the subject of this article. To convert your .pem file into a DER encoded X509 certificate file on Linux or Mac, type:
+<br />
+  openssl  x509 -outform der -in myCert.pem -out myCert.cer
+
 ### Using PEM keys
 
 If you are using the classic deploy model (Azure Classic Portal or the Azure Service Management CLI `asm`), you might need to use PEM formatted SSH keys to access your Linux VMs.  Here is how to create a PEM key from an existing SSH Public key and an existing x509 certificate.
